@@ -124,8 +124,7 @@ and run `npm run dev` again.
 2. **Delete `public/animals.json`.** The server owns the animals now.
 
 **Adopt** and **Return** still change only the browser's copy of the
-animals; the server doesn't know about them. Refresh, and every adoption is
-gone. Sending changes to the server is next week's topic.
+animals; the server doesn't know about them. 
 
 ### TODO 5: Write your reflections
 
