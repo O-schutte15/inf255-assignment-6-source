@@ -104,6 +104,15 @@ app.get("/api/animals/:id", (req, res) => {
   }
 });
 // TODO 3: GET /api/available-animals and GET /api/adopted-animals
+app.get("/api/available-animals", (req, res) => {
+  const availableAnimals = animals.filter((animal) => !animal.adopted);
+  res.json(availableAnimals);
+});
+
+app.get("/api/adopted-animals", (req, res) => {
+  const adoptedAnimals = animals.filter((animal) => animal.adopted);
+  res.json(adoptedAnimals);
+});
 
 // ------------------------------------
 // Start the Server
