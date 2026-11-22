@@ -19,42 +19,63 @@ import AnimalControls from "./components/AnimalControls.vue";
 const animals = ref([]);
 const loading = ref(false);
 const error = ref("");
-
+const selectedAnimal = ref(null);
+const detailsLoading = ref(false);
+const detailsError = ref("");
 // ------------------------------------
 // Load the Animals
 // ------------------------------------
 
 async function loadAnimals() {
-	loading.value = true;
-	error.value = "";
+  loading.value = true;
+  error.value = "";
 
-	try {
-		// TODO 4: Load the animals from your API instead of the JSON file.
-		const response = await fetch("/animals.json");
+  try {
+    // TODO 4: Load the animals from your API instead of the JSON file.
+    const response = await fetch("/api/animals");
 
-		// A 404 or 500 still comes back as a response, so check it.
-		if (!response.ok) {
-			throw new Error(`Request failed with status ${response.status}`);
-		}
+    // A 404 or 500 still comes back as a response, so check it.
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
 
-		animals.value = await response.json();
-	} catch (err) {
-		console.error(err);
-		error.value =
-			"Sorry, the animals couldn't be loaded. Try refreshing the page.";
-	}
+    animals.value = await response.json();
+  } catch (err) {
+    console.error(err);
+    error.value =
+      "Sorry, the animals couldn't be loaded. Try refreshing the page.";
+  }
 
-	loading.value = false;
+  loading.value = false;
 }
 
 loadAnimals();
+async function loadAnimalDetails(id) {
+  detailsLoading.value = true;
+  detailsError.value = "";
+  selectedAnimal.value = null;
 
+  try {
+    const response = await fetch(`/api/animals/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    selectedAnimal.value = await response.json();
+  } catch (err) {
+    console.error(err);
+    detailsError.value = "Sorry, the animal details couldn't be loaded.";
+  }
+
+  detailsLoading.value = false;
+}
 // ------------------------------------
 // Adopt or Return an Animal
 // ------------------------------------
 
 function toggleAdoption(animal) {
-	animal.adopted = !animal.adopted;
+  animal.adopted = !animal.adopted;
 }
 
 // ------------------------------------
@@ -69,76 +90,96 @@ const activeSort = ref("default");
 // of them changes, so nothing has to be called after an adoption or a
 // filter change.
 const visibleAnimals = computed(() => {
-	// sort() changes the array it is called on, so work on a copy.
-	let visible = animals.value.slice();
+  // sort() changes the array it is called on, so work on a copy.
+  let visible = animals.value.slice();
 
-	if (activeFilter.value === "available") {
-		visible = visible.filter((a) => !a.adopted);
-	} else if (activeFilter.value === "adopted") {
-		visible = visible.filter((a) => a.adopted);
-	}
+  if (activeFilter.value === "available") {
+    visible = visible.filter((a) => !a.adopted);
+  } else if (activeFilter.value === "adopted") {
+    visible = visible.filter((a) => a.adopted);
+  }
 
-	if (activeSort.value === "name") {
-		visible.sort((a, b) => a.name.localeCompare(b.name));
-	} else if (activeSort.value === "age") {
-		// A negative result puts a before b, so smaller ages come first.
-		visible.sort((a, b) => a.age - b.age);
-	}
+  if (activeSort.value === "name") {
+    visible.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (activeSort.value === "age") {
+    // A negative result puts a before b, so smaller ages come first.
+    visible.sort((a, b) => a.age - b.age);
+  }
 
-	return visible;
+  return visible;
 });
 
 // Counts from every animal, not the visible ones, so filtering doesn't
 // change the count.
 const availableCount = computed(() => {
-	return animals.value.filter((a) => !a.adopted).length;
+  return animals.value.filter((a) => !a.adopted).length;
 });
 
 function setFilter(filter) {
-	activeFilter.value = filter;
+  activeFilter.value = filter;
 }
 
 function setSort(sort) {
-	activeSort.value = sort;
+  activeSort.value = sort;
 }
 </script>
 
 <template>
-	<header>
-		<h1>Animal Adoption Board</h1>
-		<p>Meet the animals currently staying at our shelter.</p>
-	</header>
+  <header>
+    <h1>Animal Adoption Board</h1>
+    <p>Meet the animals currently staying at our shelter.</p>
+  </header>
 
-	<main>
-		<section aria-labelledby="animals-heading">
-			<h2 id="animals-heading">Animals</h2>
+  <main>
+    <section aria-labelledby="animals-heading">
+      <h2 id="animals-heading">Animals</h2>
 
-			<p v-if="!loading && !error" id="animal-count">
-				{{ availableCount }} of {{ animals.length }} animals are available for
-				adoption.
-			</p>
+      <p v-if="!loading && !error" id="animal-count">
+        {{ availableCount }} of {{ animals.length }} animals are available for
+        adoption.
+      </p>
 
-			<AnimalControls
-				:active-filter="activeFilter"
-				@filter="setFilter"
-				@sort="setSort"
-			/>
+      <AnimalControls
+        :active-filter="activeFilter"
+        @filter="setFilter"
+        @sort="setSort"
+      />
 
-			<div id="animal-list" aria-live="polite">
-				<p v-if="loading">Loading animals...</p>
-				<p v-else-if="error" class="error-message">{{ error }}</p>
-				<p v-else-if="visibleAnimals.length === 0" class="empty-message">
-					There are no animals to show.
-				</p>
-				<div v-else>
-					<AnimalCard
-						v-for="animal in visibleAnimals"
-						:key="animal.id"
-						:animal="animal"
-						@toggle="toggleAdoption(animal)"
-					/>
-				</div>
-			</div>
-		</section>
-	</main>
+      <div id="animal-list" aria-live="polite">
+        <p v-if="loading">Loading animals...</p>
+        <p v-else-if="error" class="error-message">{{ error }}</p>
+        <p v-else-if="visibleAnimals.length === 0" class="empty-message">
+          There are no animals to show.
+        </p>
+        <div v-else>
+          <AnimalCard
+            v-for="animal in visibleAnimals"
+            :key="animal.id"
+            :animal="animal"
+            @toggle="toggleAdoption(animal)"
+            @details="loadAnimalDetails(animal.id)"
+          />
+        </div>
+        <section v-if="detailsLoading">
+          <p>Loading animal details...</p>
+        </section>
+
+        <section v-else-if="detailsError" class="error-message">
+          <p>{{ detailsError }}</p>
+          <button type="button" @click="detailsError = ''">Close</button>
+        </section>
+
+        <section v-else-if="selectedAnimal" class="animal-details">
+          <h3>{{ selectedAnimal.name }}</h3>
+          <p>Species: {{ selectedAnimal.species }}</p>
+          <p v-if="selectedAnimal.breed">Breed: {{ selectedAnimal.breed }}</p>
+          <p>Age: {{ selectedAnimal.age }} years</p>
+          <p>Intake Date: {{ selectedAnimal.intakeDate }}</p>
+          <p>Status: {{ selectedAnimal.adopted ? "Adopted" : "Available" }}</p>
+
+          <button type="button" @click="selectedAnimal = null">Close</button>
+        </section>
+      </div>
+    </section>
+  </main>
 </template>
