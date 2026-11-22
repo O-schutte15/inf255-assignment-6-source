@@ -49,7 +49,7 @@ Complete the five TODOs in order.
 
    ```js
    app.get("/api/animals", (req, res) => {
-    // send every animal as JSON
+     // send every animal as JSON
    });
    ```
 
@@ -104,12 +104,12 @@ Vite can **forward** those requests for you. In `vite.config.js`, add a
 
 ```js
 export default defineConfig({
- plugins: [vue()],
- server: {
-  proxy: {
-   "/api": "http://localhost:3000",
+  plugins: [vue()],
+  server: {
+    proxy: {
+      "/api": "http://localhost:3000",
+    },
   },
- },
 });
 ```
 
@@ -124,7 +124,7 @@ and run `npm run dev` again.
 2. **Delete `public/animals.json`.** The server owns the animals now.
 
 **Adopt** and **Return** still change only the browser's copy of the
-animals; the server doesn't know about them. 
+animals; the server doesn't know about them.
 
 ### TODO 5: Write your reflections
 
@@ -132,8 +132,12 @@ Add a section to the top of this `README.md` file, above the title, titled
 `Reflections`. Please, please, please, write this yourself. Do not use AI in any part of it. Answer these questions - an honest attempt at answering is all I'm looking for. Even if you're wrong, I want you to explain your reasoning.
 
 1. What is the point of separating the app into a client and server component (Vue and Express)? Isn't it simpler to just keep everything in a single place?
-2. How do you think you will use the client/server combination in your final project? Which part will live on the client, and which on the server?
-3. Do you prefer working with Vue or vanilla (basic) JS, and why?
+   I thinks it's mostly from an orgination reasons they're working as
+   a team and you've split it between Client and Server so that if we kept bulding this into a big project it would be easier to follow and not just sifiting through a giant block of code.
+
+2. How do you think you will use the client/server combination in your final project? Which part will live on the client, and which on the server? The client side I think will have showing NFl teams/players, the draft and avabile postions, the spin of decade and teams. The server will store and retirve NFL player stats/info draft selcetions and checking postions are filled adn saving game progress and complted rosters
+
+3. Do you prefer working with Vue or vanilla (basic) JS, and why? Honestly I say basic JS but I think that's only becasue it's what I'm comfortbale with it's what I've used previsolu in old project, so once I take what VUE I've learned and try using it in some persoanl projects my opnion may shift.
 
 ---
 
