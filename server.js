@@ -94,7 +94,15 @@ app.get("/api/animals", (req, res) => {
   res.json(animals);
 });
 // TODO 2: GET /api/animals/:id sends one animal, or a 404.
+app.get("/api/animals/:id", (req, res) => {
+  const animal = animals.find((a) => a.id === Number(req.params.id));
 
+  if (animal) {
+    res.json(animal);
+  } else {
+    res.status(404).json({ error: "Animal not found" });
+  }
+});
 // TODO 3: GET /api/available-animals and GET /api/adopted-animals
 
 // ------------------------------------
